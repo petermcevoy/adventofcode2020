@@ -2,16 +2,17 @@ use std::fs::File;
 use std::path::Path;
 use std::io::{BufRead, BufReader};
 
-pub fn run(args: Vec<String>) {
-    let filepath = Path::new(&args[1]);
-    let file = File::open(filepath).expect("Could not open path");
+pub fn run(input_path: &Path) -> bool {
+    let file = File::open(input_path).expect("Could not open path");
     let reader = BufReader::new(file);
-
     let lines: Vec<u32> = reader.lines().map(|l| l.unwrap().parse::<u32>().unwrap() ).collect();
-    println!("Part 1:");
+
+    print!("Part 1: ");
     let _product_part1 = find_matches(&lines, 2020, 2);
-    println!("Part 2:");
+    print!("Part 2: ");
     let _product_part2 = find_matches(&lines, 2020, 3);
+
+    return true;
 }
 
 fn find_matches(lines: &Vec<u32>, sum_match: u32, num_terms: usize) -> Option<u32> {

@@ -1,16 +1,18 @@
 use std::env;
+use std::path::Path;
 
 mod day01;
+mod day02;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let day = &args[1];
+    let day = args.get(1).map(String::as_str);
 
-    let mut pass_args = args.clone();
-    pass_args.remove(1);
-
-    match &day[..] {
-        "01" => day01::run(pass_args),
-        _ => println!("day not found")
-    }
+    let success = match day {
+        Some("01") => day01::run(&Path::new("input/day01.txt")),
+        Some("02") => day02::run(&Path::new("input/day02.txt")),
+        _ => { eprintln!("day not found"); false }
+    };
+    
+    if !success { std::process::exit(1); }
 }
