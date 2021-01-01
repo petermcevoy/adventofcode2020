@@ -14,10 +14,22 @@ pub fn run(input_path: &Path) -> bool {
         }
     };
 
-    println!(
-        "Num trees along direction (3, 1): {}",
-        count_trees_along_direction(&map, 3,1)
-    );
+    let num_trees_3_1 = count_trees_along_direction(&map, 3,1);
+    println!("[Part 1] Num trees along direction (3, 1): {}", num_trees_3_1);
+
+    // Part 2
+    let num_trees_1_1 = count_trees_along_direction(&map, 1,1);
+    let num_trees_5_1 = count_trees_along_direction(&map, 5,1);
+    let num_trees_7_1 = count_trees_along_direction(&map, 7,1);
+    let num_trees_1_2 = count_trees_along_direction(&map, 1,2);
+    
+    let product = 
+        count_trees_along_direction(&map, 1,1) *
+        num_trees_3_1 *
+        count_trees_along_direction(&map, 5,1) *
+        count_trees_along_direction(&map, 7,1) *
+        count_trees_along_direction(&map, 1,2);
+    println!("[Part 2] Product of num. trees along slopes: : {}", product);
 
     return true;
 }
