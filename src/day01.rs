@@ -12,12 +12,12 @@ pub fn run(input_path: &Path) -> bool {
     print!("Part 2: ");
     let _product_part2 = find_matches(&lines, 2020, 3);
 
-    return true;
+    true
 }
 
-fn find_matches(lines: &Vec<u32>, sum_match: u32, num_terms: usize) -> Option<u32> {
+fn find_matches(lines: &[u32], sum_match: u32, num_terms: usize) -> Option<u32> {
     let mut indices: Vec<usize> = vec![0; num_terms];
-    for i in 0..num_terms { indices[i] = i; }
+    for (i, item) in indices.iter_mut().enumerate() { *item = i }
     
     loop {
         let mut sum = 0;
@@ -47,5 +47,5 @@ fn find_matches(lines: &Vec<u32>, sum_match: u32, num_terms: usize) -> Option<u3
         if indices[0] == (lines.len() - 1) {break;}
     }
 
-    return None;
+    None
 }

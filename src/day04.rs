@@ -21,7 +21,7 @@ pub fn run(input_path: &Path) -> bool {
     println!("[Part 2] Num valid passports: {}", 
              passports.iter().filter(|p| p.is_valid_part2()).count());
 
-    return true;
+    true
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -44,29 +44,28 @@ struct Passport {
 impl Passport {
     fn is_valid_part1(&self) -> bool {
         // Make cid not required
-        return 
-            self.byr.is_some() &&
-            self.iyr.is_some() &&
-            self.eyr.is_some() &&
-            self.hgt.is_some() &&
-            self.hcl.is_some() &&
-            self.ecl.is_some() &&
-            self.pid.is_some()
-            //self.cid.is_some()
+        self.byr.is_some() &&
+        self.iyr.is_some() &&
+        self.eyr.is_some() &&
+        self.hgt.is_some() &&
+        self.hcl.is_some() &&
+        self.ecl.is_some() &&
+        self.pid.is_some()
+        //self.cid.is_some()
     }
     
     fn is_valid_part2(&self) -> bool {
-        let valid_byr = self.byr.map_or(false, |v| v >= 1920 && v <= 2002);
-        let valid_iyr = self.iyr.map_or(false, |v| v >= 2010 && v <= 2020);
-        let valid_eyr = self.eyr.map_or(false, |v| v >= 2020 && v <= 2030);
+        let valid_byr = self.byr.map_or(false, |v| (1920..=2002).contains(&v));
+        let valid_iyr = self.iyr.map_or(false, |v| (2010..=2020).contains(&v));
+        let valid_eyr = self.eyr.map_or(false, |v| (2020..=2030).contains(&v));
         let valid_hgt = self.hgt.map_or(false, |v| {
             match v {
-                PassportHeight::Centimeters(h) => h >= 150 && h <= 193,
-                PassportHeight::Inches(h) => h >= 59 && h <= 76,
+                PassportHeight::Centimeters(h) => (150..=193).contains(&h),
+                PassportHeight::Inches(h) => (59..=76).contains(&h),
             }
         });
         let valid_hcl = self.hcl.as_ref().map_or(false, |v| {
-            (v.chars().nth(0) == Some('#')) &&
+            (v.starts_with('#')) &&
             (v.chars().count() == 7) &&
             (v.as_str()[1..].chars().all(|c| matches!(c, '0'..='9') || matches!(c, 'a'..='f')))
         });
@@ -78,14 +77,13 @@ impl Passport {
             v.chars().all(|c| matches!(c, '0'..='9'))
         });
 
-        return 
-            valid_byr &&
-            valid_iyr &&
-            valid_eyr &&
-            valid_hgt &&
-            valid_hcl &&
-            valid_ecl &&
-            valid_pid
+        valid_byr &&
+        valid_iyr &&
+        valid_eyr &&
+        valid_hgt &&
+        valid_hcl &&
+        valid_ecl &&
+        valid_pid
     }
 }
 

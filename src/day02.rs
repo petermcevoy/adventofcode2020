@@ -20,7 +20,7 @@ pub fn run(input_path: &Path) -> bool {
     let num_valid_part2 = records.iter().filter(|r| check_policy2(&r)).count();
     println!("Part 2: num valid passwords: {}", num_valid_part2);
 
-    return true;
+    true
 }
 
 #[derive(Debug)]
@@ -48,14 +48,14 @@ fn parse(filepath: &Path) -> Result<Vec<PasswordRecord>, Box<dyn Error>> {
     let reader = BufReader::new(&file);
     for (i_line, line) in reader.lines().enumerate() {
         let line = line?;
-        let parts: Vec<&str> = line.split(":").collect();
+        let parts: Vec<&str> = line.split(':').collect();
         let policy_str = parts[0];
         let password_str = parts[1];
 
-        let policy_parts: Vec<&str> = policy_str.split(" ").collect();
+        let policy_parts: Vec<&str> = policy_str.split(' ').collect();
         let policy_char = policy_parts[1].chars().next()
-            .ok_or(parse_err(None, i_line))?;
-        let range_parts: Vec<&str> = policy_parts[0].split("-").collect();
+            .ok_or_else(|| parse_err(None, i_line))?;
+        let range_parts: Vec<&str> = policy_parts[0].split('-').collect();
         let range_start = range_parts[0].parse::<usize>()
             .map_err(|e| parse_err(Some(&e), i_line))?;
         let range_end = range_parts[1].parse::<usize>()
@@ -69,12 +69,12 @@ fn parse(filepath: &Path) -> Result<Vec<PasswordRecord>, Box<dyn Error>> {
         });
     }
 
-    return Ok(records);
+    Ok(records)
 }
 
 fn check_policy1(record: &PasswordRecord) -> bool {
     let char_count = record.password.matches(record.charachter).count();
-    return char_count >= record.range_start && char_count <= record.range_end;
+    char_count >= record.range_start && char_count <= record.range_end
 }
 
 fn check_policy2(record: &PasswordRecord) -> bool {
@@ -83,5 +83,5 @@ fn check_policy2(record: &PasswordRecord) -> bool {
     let char1 = record.password.chars().nth(i1).unwrap();
     let char2 = record.password.chars().nth(i2).unwrap();
 
-    return (char1 == record.charachter) ^ (char2 == record.charachter);
+    (char1 == record.charachter) ^ (char2 == record.charachter)
 }

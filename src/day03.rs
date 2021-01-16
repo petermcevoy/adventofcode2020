@@ -31,7 +31,7 @@ pub fn run(input_path: &Path) -> bool {
         num_trees_1_2;
     println!("[Part 2] Product of num. trees along slopes: : {}", product);
 
-    return true;
+    true
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -65,7 +65,7 @@ fn parse(filepath: &Path) -> Result<TobogganMap, Box<dyn Error>> {
     let mut tiles: Vec<TileType>;
     {
         
-        let line = BufReader::new(&file).lines().nth(0).unwrap()?;
+        let line = BufReader::new(&file).lines().next().unwrap()?;
         cols = line.chars().count();
         tiles = vec![TileType::Open; rows*cols];
         file.seek(io::SeekFrom::Start(0))?;
