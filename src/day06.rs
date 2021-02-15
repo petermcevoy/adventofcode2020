@@ -53,33 +53,24 @@ fn parse_part2<R: BufRead>(reader: R) -> Vec<u32> {
     let input = input_vec.join("\n");
     
     for group_decl_str in input.split("\n\n") {
-        
         // Within the group, how many questions did everyone answer yes to?
         // answers are from a-z. We need 26 positions -> 32 bits will do.
-        let mut group_bitflags: u32 = 0xffffffff;
-
-        for individual_decl_str in group_decl_str.lines() {
-            // For the individual within the group, make a mask of all
-            // the questions they answered yes to.
-            let mut individual_mask: u32 = 0x0;
-            for c in individual_decl_str.chars() {
-                if ('a'..='z').contains(&c) {
+        let group_bitflags = group_decl_str.lines()
+            .map(|l| {
+                // Turn individual char string into a 32bit bitfield
+                l.chars().fold(0u32, |mask, c| {
+                    assert!(('a'..='z').contains(&c));
                     let mut b = [0; 1];
                     c.encode_utf8(&mut b);
                     let asci_count: u8 = b[0] - b'a';
-                    let bitflag: u32 = 0b1 << asci_count;
-                    individual_mask = individual_mask | bitflag;
-                } else {
-                    panic!("Unexpected answer, should be a..z!");
-                }
 
-            }
-            
-            group_bitflags = group_bitflags & individual_mask;
-        }
+                    mask | (0b1 << asci_count)
+                })
+            })
+            .fold(0xffffffff, |mask, c| mask & c);
+
         let num_yes = group_bitflags.count_ones();
         declarations.push(num_yes);
-        //println!("---\n{}\ncount: {}", group_decl_str, num_yes);
     }
 
     declarations
