@@ -1,6 +1,7 @@
 use std::env;
 use std::path::Path;
 
+pub mod common;
 mod day01;
 mod day02;
 mod day03;

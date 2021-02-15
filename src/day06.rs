@@ -1,20 +1,18 @@
-use std::fs::File;
 use std::path::Path;
-use std::io::{BufRead, BufReader};
 use std::collections::HashSet;
+use super::common;
 
 pub fn run(input_path: &Path) -> bool {
+    let input = common::file_as_string(input_path);
     
     println!("Part1");
-    let file = File::open(input_path).expect("Could not open file");
-    let declarations_part1 = parse_part1(BufReader::new(&file));
+    let declarations_part1 = parse_part1(input.as_str());
     let sum: usize = declarations_part1.iter().map(|decl| decl.len()).sum();
     println!("Sum: {}", sum);
     assert_eq!(sum, 6443);
     
     println!("Part2");
-    let file = File::open(input_path).expect("Could not open file");
-    let v = parse_part2(BufReader::new(&file));
+    let v = parse_part2(input.as_str());
     let sum: u32 = v.iter().map(|decl| decl).sum();
     println!("Sum: {}", sum);
     assert_eq!(sum, 3232);
@@ -24,38 +22,22 @@ pub fn run(input_path: &Path) -> bool {
 
 type GroupDeclaration = HashSet<char>;
 
-fn parse_part1<R: BufRead>(reader: R) -> Vec<GroupDeclaration> {
+fn parse_part1(input: &str) -> Vec<GroupDeclaration> {
     let mut declarations: Vec<GroupDeclaration> = Vec::new();
-    let mut current_declaration = GroupDeclaration::new();
 
-    for line in reader.lines() {
-        match line.as_deref() {
-            Ok("") => {
-                declarations.push(current_declaration);
-                current_declaration = GroupDeclaration::new();
-            }, 
-            Ok(v) => {
-                for c in v.chars() {
-                    current_declaration.insert(c);
-                }
-            }, 
-            _ => panic!("Unexpected line")
-        }
+    for group_decl in input.split("\n\n") {
+        declarations.push(group_decl.chars().filter(|&c| c != '\n').collect());
     }
-    declarations.push(current_declaration); // Add final declaration
     declarations
 }
 
-fn parse_part2<R: BufRead>(reader: R) -> Vec<u32> {
+fn parse_part2(input: &str) -> Vec<u32> {
     let mut declarations: Vec<u32> = Vec::new();
 
-    let input_vec: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
-    let input = input_vec.join("\n");
-    
-    for group_decl_str in input.split("\n\n") {
+    for group_decl in input.split("\n\n") {
         // Within the group, how many questions did everyone answer yes to?
         // answers are from a-z. We need 26 positions -> 32 bits will do.
-        let group_bitflags = group_decl_str.lines()
+        let group_bitflags = group_decl.lines()
             .map(|l| {
                 // Turn individual char string into a 32bit bitfield
                 l.chars().fold(0u32, |mask, c| {
@@ -72,9 +54,7 @@ fn parse_part2<R: BufRead>(reader: R) -> Vec<u32> {
         let num_yes = group_bitflags.count_ones();
         declarations.push(num_yes);
     }
-
     declarations
-
 }
 
 #[cfg(test)]
@@ -99,7 +79,7 @@ b";
 
     #[test]
     fn example_part1() {
-        let declarations = parse_part1(BufReader::new(EXAMPLE_INPUT.as_bytes()));
+        let declarations = parse_part1(EXAMPLE_INPUT);
         for (i, dec) in declarations.iter().enumerate() {
             println!("{}: {}", i, dec.len());
             match i {
@@ -130,7 +110,7 @@ b";
     
     #[test]
     fn example_part2() {
-        let declarations = parse_part2(BufReader::new(EXAMPLE_INPUT.as_bytes()));
+        let declarations = parse_part2(EXAMPLE_INPUT);
         for (i, dec) in declarations.iter().enumerate() {
             println!("{}: {}", i, dec);
             match i {
@@ -151,7 +131,7 @@ b";
         }
 
         let sum: u32 = declarations.iter().map(|decl| decl).sum();
-        assert_eq!(7, sum);
+        assert_eq!(6, sum);
     }
 }
 
