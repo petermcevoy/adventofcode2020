@@ -8,6 +8,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -20,6 +21,7 @@ fn main() {
         Some("04") => day04::run(&Path::new("input/day04.txt")),
         Some("05") => day05::run(&Path::new("input/day05.txt")),
         Some("06") => day06::run(&Path::new("input/day06.txt")),
+        Some("07") => day07::run(&Path::new("input/day07.txt")),
         _ => { eprintln!("day not found"); false }
     };
     
