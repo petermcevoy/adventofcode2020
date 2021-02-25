@@ -4,13 +4,15 @@ use super::common;
 
 pub fn run(input_path: &Path) -> bool {
     let input = common::file_as_string(input_path);
-    let num_types = calc_num_bag_types_that_can_contain_shiny_gold(&input);
-    assert_eq!(num_types, 128);
+    let (num_bags_contained, num_types_that_can_contain) = calc_bags(&input);
+    assert_eq!(num_types_that_can_contain, 128);
+    assert_eq!(num_bags_contained, 20189);
     true
 }
 
-fn calc_num_bag_types_that_can_contain_shiny_gold(input: &str) -> usize {
-    let mut bag_map: HashMap<&str, Vec<&str>> = HashMap::new();
+fn calc_bags(input: &str) -> (usize, usize) {
+    let mut bag_map_contains: HashMap<&str, Vec<(usize, &str)>> = HashMap::new();
+    let mut bag_map_is_contained_in: HashMap<&str, Vec<&str>> = HashMap::new();
     for line in input.lines() {
         let mut spec_split = line.split(" bags contain ");
         let bag_key = spec_split.next().unwrap();
@@ -19,11 +21,18 @@ fn calc_num_bag_types_that_can_contain_shiny_gold(input: &str) -> usize {
         for b in bag_contains {
             let b = b.trim_end_matches(".").trim_end_matches(" bag").trim_end_matches(" bags");
             if b != "no other" {
-                let b = b.trim_start_matches(|c: char| c.is_numeric()).trim_start(); // remove number and space
+                let n: usize = b.matches(char::is_numeric).nth(0).unwrap().parse().unwrap();
+                let b = b.trim_start_matches(|c: char| c.is_numeric() || c == ' '); // remove number and space
+                
+                match bag_map_contains.get_mut(bag_key) {
+                    Some(v) => v.push((n, b)),
+                    None => { bag_map_contains.insert(bag_key, vec![(n, b)]); }
+                }
+
                 let is_contained_in = bag_key;
-                match bag_map.get_mut(b) {
+                match bag_map_is_contained_in.get_mut(b) {
                     Some(v) => v.push(is_contained_in),
-                    None => { bag_map.insert(b, vec![bag_key]); }
+                    None => { bag_map_is_contained_in.insert(b, vec![is_contained_in]); }
                 }
             }
         }
@@ -33,25 +42,35 @@ fn calc_num_bag_types_that_can_contain_shiny_gold(input: &str) -> usize {
     let look_for_key = "shiny gold";
     let mut new_types_stack: Vec<&str> = vec![look_for_key];
     while let Some(k) = new_types_stack.pop() {
-        match bag_map.get(k) {
-            Some(vec) => { 
-                for e in vec { 
-                    types.insert(e); 
-                    new_types_stack.push(e);
-                } 
-            },
-            None => {}
+        if let Some(vec) = bag_map_is_contained_in.get(k) {
+            for e in vec { 
+                types.insert(e); 
+                new_types_stack.push(e);
+            } 
         }
     }
 
     println!("Number of bag types that can contain at least one {}: {}", look_for_key, types.len());
-    return types.len();
+
+    let mut bag_count = 0;
+    let mut search_stack: Vec<(usize, &str)> = vec![(1, look_for_key)];
+    while let Some((n_search, k_search)) = search_stack.pop() {
+        if let Some(vec) = bag_map_contains.get(k_search) {
+            for (n, k) in vec {
+                bag_count += n_search*n;
+                search_stack.push((n_search*n, k));
+            }
+        }
+    }
+    println!("Number of bags that 1 {} bag contains: {}", look_for_key, bag_count);
+
+
+    return (bag_count, types.len());
 }
 
 
 #[cfg(test)]
 mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
     #[test]
@@ -67,8 +86,10 @@ faded blue bags contain no other bags.
 dotted black bags contain no other bags.
 ";
 
-        let num_types = calc_num_bag_types_that_can_contain_shiny_gold(example_str);
-        assert_eq!(num_types, 4);
+        let (num_bags_contained, num_types_that_can_contain) = calc_bags(example_str);
+        assert_eq!(num_types_that_can_contain, 4);
+        assert_eq!(num_bags_contained, 32);
+
     }
 }
 
