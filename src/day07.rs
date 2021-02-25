@@ -16,46 +16,36 @@ fn calc_num_bag_types_that_can_contain_shiny_gold(input: &str) -> usize {
         let bag_key = spec_split.next().unwrap();
         let bag_contains = spec_split.next().unwrap().split(", ");
         
-        println!("{} contains", bag_key);
         for b in bag_contains {
             let b = b.trim_end_matches(".").trim_end_matches(" bag").trim_end_matches(" bags");
             if b != "no other" {
-                let b = b.trim_start_matches(|c: char| c.is_numeric()).trim_start(); // remove number
-                println!("\t{}", b);
-
+                let b = b.trim_start_matches(|c: char| c.is_numeric()).trim_start(); // remove number and space
                 let is_contained_in = bag_key;
                 match bag_map.get_mut(b) {
-                    Some(v) => v.push(bag_key),
+                    Some(v) => v.push(is_contained_in),
                     None => { bag_map.insert(b, vec![bag_key]); }
                 }
             }
         }
     }
 
-    println!("------");
     let mut types: HashSet<&str> = HashSet::new();
     let look_for_key = "shiny gold";
-    types.insert(look_for_key);
-    loop {
-        let num_before = types.len();
-        for k in types.clone().iter() {
-            match bag_map.get(k) {
-                Some(vec) => {
-                    for e in vec {
-                        types.insert(e);
-                        println!("Added {}", e);
-                    }
-                },
-                None => {}
-            }
+    let mut new_types_stack: Vec<&str> = vec![look_for_key];
+    while let Some(k) = new_types_stack.pop() {
+        match bag_map.get(k) {
+            Some(vec) => { 
+                for e in vec { 
+                    types.insert(e); 
+                    new_types_stack.push(e);
+                } 
+            },
+            None => {}
         }
-
-        let num_after = types.len();
-        if num_before == num_after { break; }
     }
 
-    println!("Number of bag types that can contain at least one {}: {}", look_for_key, types.len() - 1);
-    return types.len() - 1;
+    println!("Number of bag types that can contain at least one {}: {}", look_for_key, types.len());
+    return types.len();
 }
 
 
